@@ -36,14 +36,14 @@ module.exports = class MustacheTemplateController extends BaseTemplateController
 
   async processTemplate(templates, view) {
     let customTags = objectPath.get(this.data, ['object', 'spec', 'custom-tags']);
+    let templatesString = await this._stringify(templates);
     let tempTags = Mustache.tags;
     if (customTags) {
       Mustache.tags = customTags;
     }
-    let templatesString = await this._stringify(templates);
     let resultString = Mustache.render(templatesString, view);
-    let result = await this._parse(resultString);
     Mustache.tags = tempTags;
+    let result = await this._parse(resultString);
     return result;
   }
 

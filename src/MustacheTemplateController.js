@@ -17,12 +17,12 @@
 const Mustache = require('mustache');
 const objectPath = require('object-path');
 
-const { BaseTemplateController } = require('@razee/kapitan-core');
+const { BaseTemplateController } = require('@razee/razeedeploy-core');
 
 
 module.exports = class MustacheTemplateController extends BaseTemplateController {
   constructor(params) {
-    params.finalizerString = params.finalizerString || 'children.mustachetemplate.kapitan.razee.io';
+    params.finalizerString = params.finalizerString || 'children.mustachetemplate.deploy.razee.io';
     super(params);
   }
 

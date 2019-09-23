@@ -4,7 +4,7 @@
 [![Greenkeeper badge](https://badges.greenkeeper.io/razee-io/MustacheTemplate.svg)](https://greenkeeper.io/)
 ![GitHub](https://img.shields.io/github/license/razee-io/MustacheTemplate.svg?color=success)
 
-MustacheTemplate is the next step of complexity when working with kapitan. With
+MustacheTemplate is the next step of complexity when working with Razee. With
 MustacheTemplate we can inject cluster specific environment variables into
 resources before applying them to a cluster. We even use this injection method
 as the mechanism for version control of our resources.
@@ -24,7 +24,7 @@ kubectl apply -f "https://github.com/razee-io/MustacheTemplate/releases/latest/d
 ### Sample
 
 ```yaml
-apiVersion: "kapitan.razee.io/v1alpha1"
+apiVersion: "deploy.razee.io/v1alpha1"
 kind: MustacheTemplate
 metadata:
   name: <mustache_template_name>
@@ -213,23 +213,23 @@ If fetching env/envFrom resource fails, will use the value specified by default.
 
 #### Reconcile
 
-`.spec.templates.metadata.labels[kapitan.razee.io/Reconcile]`
+`.spec.templates.metadata.labels[deploy.razee.io/Reconcile]`
 
 - DEFAULT: `true`
-  - A kapitan resource (parent) will clean up a resources it applies (child) when
-either the child is no longer in the parent resource definition or the parent is
-deleted.
+  - A razeedeploy resource (parent) will clean up a resources it applies (child)
+when either the child is no longer in the parent resource definition or the
+parent is deleted.
 - `false`
   - This behavior can be overridden when a child's resource definition has
-the label `kapitan.razee.io/Reconcile=false`.
+the label `deploy.razee.io/Reconcile=false`.
 
 #### Resource Update Mode
 
-`.spec.templates.metadata.labels[kapitan.razee.io/mode]`
+`.spec.templates.metadata.labels[deploy.razee.io/mode]`
 
-Kapitan resources default to merge patching children. This behavior can be
+Razeedeploy resources default to merge patching children. This behavior can be
 overridden when a child's resource definition has the label
-`kapitan.razee.io/mode=<mode>`
+`deploy.razee.io/mode=<mode>`
 
 Mode options:
 
@@ -268,11 +268,11 @@ If you want to have the EnsureExist behavior, see [Resource Update Mode](#Resour
 ### Lock Cluster Updates
 
 Prevents the controller from updating resources on the cluster. If this is the
-first time creating the `kapitan-config` ConfigMap, you must delete the running
+first time creating the `razeedeploy-config` ConfigMap, you must delete the running
 controller pods so the deployment can mount the ConfigMap as a volume. If the
-`kapitan-config` ConfigMap already exists, just add the pair `lock-cluster: true`.
+`razeedeploy-config` ConfigMap already exists, just add the pair `lock-cluster: true`.
 
 1. `export CONTROLLER_NAME=mustachetemplate-controller && export CONTROLLER_NAMESPACE=razee`
-1. `kubectl create cm kapitan-config -n $CONTROLLER_NAMESPACE --from-literal=lock-cluster=true`
+1. `kubectl create cm razeedeploy-config -n $CONTROLLER_NAMESPACE --from-literal=lock-cluster=true`
 1. `kubectl delete pods -n $CONTROLLER_NAMESPACE $(kubectl get pods -n $CONTROLLER_NAMESPACE
  | grep $CONTROLLER_NAME | awk '{print $1}' | paste -s -d ',' -)`

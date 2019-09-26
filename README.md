@@ -30,7 +30,7 @@ metadata:
   name: <mustache_template_name>
   namespace: <namespace>
 spec:
-  custom-tags: ['<%', '%>']
+  # custom-tags: ['<%', '%>']
   envFrom:
   - optional: true
     configMapRef:
@@ -56,7 +56,7 @@ spec:
         app: nginx
         deployment: {{ app-label }}
     spec:
-      replicas: {{ desired-replicas }}
+      replicas: 3
       selector:
         matchLabels:
           app: nginx

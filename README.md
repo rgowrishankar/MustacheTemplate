@@ -48,28 +48,35 @@ spec:
          namespace: <ConfigMap Namespace>
          key: <key within that ConfigMap
   templates:
-  - apiVersion: apps/v1
-    kind: Deployment
+  - apiVersion: v1
+    kind: ConfigMap
     metadata:
-      name: nginx-deployment
-      labels:
-        app: nginx
-        deployment: {{ app-label }}
-    spec:
-      replicas: 3
-      selector:
-        matchLabels:
+      name: test-config
+    data:
+      test: "{{ desired-replicas }}"
+  - |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx-deployment
+        labels:
           app: nginx
-      template:
-        metadata:
-          labels:
+          deployment: {{ app-label }}
+      spec:
+        replicas: {{ desired-replicas }}
+        selector:
+          matchLabels:
             app: nginx
-        spec:
-          containers:
-          - name: nginx
-            image: nginx:1.7.9
-            ports:
-            - containerPort: 80
+        template:
+          metadata:
+            labels:
+              app: nginx
+          spec:
+            containers:
+            - name: nginx
+              image: nginx:1.7.9
+              ports:
+              - containerPort: 80
 ```
 
 ### Required Fields

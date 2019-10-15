@@ -242,20 +242,21 @@ items:
                 required: [templates]
                 properties:
                   templates:
-                    type: array
                     items:
-                      type: object
-                      required: [kind, apiVersion, metadata]
-                      properties:
-                        kind:
-                          type: string
-                        apiVersion:
-                          type: string
-                        metadata:
-                          type: object
-                          required: [name]
-                          properties:
-                            name:
-                              type: string
-                            namespace:
-                              type: string
+                      oneOf:
+                      - type: string
+                      - type: object
+                        required: [kind, apiVersion, metadata]
+                        properties:
+                          kind:
+                            type: string
+                          apiVersion:
+                            type: string
+                          metadata:
+                            type: object
+                            required: [name]
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string

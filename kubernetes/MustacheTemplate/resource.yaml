@@ -242,6 +242,7 @@ items:
                 required: [templates]
                 properties:
                   templates:
+                    type: array
                     items:
                       oneOf:
                       - type: string

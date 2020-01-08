@@ -1,7 +1,7 @@
 # MustacheTemplate
 
 [![Build Status](https://travis-ci.com/razee-io/MustacheTemplate.svg?branch=master)](https://travis-ci.com/razee-io/MustacheTemplate)
-[![Greenkeeper badge](https://badges.greenkeeper.io/razee-io/MustacheTemplate.svg)](https://greenkeeper.io/)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=razee-io/MustacheTemplate)](https://dependabot.com)
 ![GitHub](https://img.shields.io/github/license/razee-io/MustacheTemplate.svg?color=success)
 
 MustacheTemplate is the next step of complexity when working with Razee. With

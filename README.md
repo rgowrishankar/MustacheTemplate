@@ -24,36 +24,35 @@ kubectl apply -f "https://github.com/razee-io/MustacheTemplate/releases/latest/d
 ### Sample
 
 ```yaml
-apiVersion: "deploy.razee.io/v1alpha1"
+apiVersion: deploy.razee.io/v1alpha2
 kind: MustacheTemplate
 metadata:
   name: <mustache_template_name>
   namespace: <namespace>
 spec:
-  # custom-tags: ['<%', '%>']
   envFrom:
-  - optional: true
-    configMapRef:
-      name: <ConfigMap Name>
-      namespace: <ConfigMap Namespace>
+  - genericMapRef:
+      apiVersion: deploy.razee.io/v1alpha2
+      kind: FeatureFlagSetLD
+      name: myLDProject
+      namespace: default
   env:
-  - name: desired-replicas
-    value: 3
-  - name: app-label
-    optional: true
-    default: "deployment 1"
-    valueFrom:
-      configMapKeyRef:
-         name: <ConfigMap Name>
-         namespace: <ConfigMap Namespace>
-         key: <key within that ConfigMap
+    - name: app-label
+      value: "deployment 1"
+    - name: desired-replicas
+      valueFrom:
+        configMapKeyRef:
+          name: nginx-config
+          key: replicas
+          type: number
   templates:
   - apiVersion: v1
     kind: ConfigMap
     metadata:
       name: test-config
     data:
-      test: "{{ desired-replicas }}"
+      sample: "{{ desired-replicas }}"
+  strTemplates:
   - |
       apiVersion: apps/v1
       kind: Deployment
@@ -79,142 +78,277 @@ spec:
               - containerPort: 80
 ```
 
-### Required Fields
+### Spec
 
-- `.spec.templates`
-  - type: array
-  - items:
-    - type: object
-    - required: [kind, apiVersion, metadata]
+**Path:** `.spec`
 
-## Features
+**Description:** `spec` is required and **must** include at least one [`envFrom`
+, `env`] and at least one [`templates`, `strTemplates`].
+
+**Schema:**
+
+```yaml
+spec:
+  type: object
+  allOf:
+    - anyOf:
+        - required: [templates]
+        - required: [strTemplates]
+    - anyOf:
+        - required: [envFrom]
+        - required: [env]
+  properties:
+    custom-tags:
+      type: array
+      ...
+    envFrom:
+      type: array
+      ...
+    env:
+      type: array
+      ...
+    templates:
+      type: array
+      ...
+    strTemplates:
+      type: array
+      ...
+```
 
 ### Custom Tags
 
-`.spec.custom-tags`
+**Path:** `.spec.custom-tags`
 
-Specifying custom tags will override the default mustache tags. this can be useful
-when you need to reserve `{{ }}` for some other processing.
+**Description:** Specifying custom tags will override the default mustache tags.
+This can be useful when you need to reserve `{{ }}` for some other processing.
 
-- Schema:
-  - type: array
-  - minItems/maxItems: 2
-  - items:
-    - type: string
-    - minLength: 2
-    - maxLength: 3
-  - default: `['{{', '}}']`
+**Schema:**
+
+```yaml
+custom-tags:
+  type: array
+  maxItems: 2
+  minItems: 2
+  items:
+    type: string
+    maxLength: 3
+    minLength: 2
+```
+
+**Default:** `['{{', '}}']`
 
 ### EnvFrom
 
-`.spec.envFrom`
+**Path:** `.spec.envFrom`
 
-Allows you to pull in all values from a resource's `.data` to be used in template
-processing. **Note**: values are loaded in `.spec.envFrom` before
-`.spec.env`, top down. Any values with the same key/name will be overwritten;
-last in wins.
+**Description:** Allows you to pull in all values from a resource's `.data` section
+to be used in template processing. ie. ConfigMaps would use the `configMapRef` key
+and CRDs with a high level `.data` section can be pulled in by using the
+`genericMapRef` key. The keys pulled from the resource are what you would use
+to match values into your templates.
 
-- Schema:
-  - type: array
-  - items:
-    - type: object
-    - required: oneOf [configMapRef, secretMapRef, genericMapRef]
-    - optional: [optional]
+**Note:**: values are loaded in from `.spec.envFrom` before `.spec.env`, and
+top down. Any values with the same key/name will be overwritten, last in wins.
 
-#### EnvFrom Ref
+**Schema:**
 
-- `.spec.envFrom.configMapRef` || `.spec.envFrom.secretMapRef`
-  - retrieves all values from a ConfigMap or Secret. The keys from the ConfigMap
-  or Secret become the names used to insert the referenced value into the template.
-  - Schema:
-    - type: object
-    - required: [name]
-    - optional: [namespace]
-- `.spec.envFrom.genericMapRef`
-  - retrieves all values from any resource kind that has a `.data` section to pull
-   from. The keys from the `.data` section become the names used to insert the referenced
-   value into the template.
-  - Schema:
-    - type: object
-    - required: [apiVersion, kind, name]
-    - optional: [namespace]
+```yaml
+envFrom:
+  type: array
+  items:
+    type: object
+    oneOf:
+      - required: [configMapRef]
+      - required: [secretMapRef]
+      - required: [genericMapRef]
+    properties:
+      optional:
+        type: boolean
+      configMapRef:
+        type: object
+        required: [name]
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+      secretMapRef:
+        type: object
+        required: [name]
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+      genericMapRef:
+        type: object
+        required: [apiVersion, kind, name]
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          name:
+            type: string
+          namespace:
+            type: string
+```
 
 #### EnvFrom Optional
 
-`.spec.envFrom.optional`
+**Path:** `.spec.envFrom[].optional`
 
-- DEFAULT: `false`
-  - if fetching env/envFrom resource fails, MustacheTemplate will stop
-  execution and report error to `.status`.
-- `true`
-  - if fetching env/envFrom resource fails, MustacheTemplate will continue
-  attempting to process the templates, and will report info to `.status`.
-- Schema:
-  - type: boolean
+**Description:** If fetching env/envFrom resource fails, MustacheTemplate will stop
+execution and report error to `.status`. You can allow execution to continue by
+marking a reference as optional.
+
+**Schema:**
+
+```yaml
+optional:
+  type: boolean
+```
+
+**Default:** `false`
 
 ### Env
 
-`.spec.env`
+**Path:** `.spec.env`
 
-Allows you to pull in a single value from a resource's `.data` to be used in template
-processing. **Note**: values are loaded in `.spec.envFrom` before
-`.spec.env`, top down. Any values with the same key/name will be overwritten;
-last in wins.
+**Description:** Allows you to pull in a single value from a resource's `.data`
+section to be used in template processing. ie. ConfigMaps would use the
+`configMapKeyRef` key and CRDs with a high level `.data` section can be pulled
+from by using the `genericKeyRef` key. `.spec.env.name` is what you would use to
+match values into your templates.
 
-- Schema:
-  - type: array
-  - items:
-    - type: object
-    - required:
-      - name
-      - oneOf [value, valueFrom.configMapKeyRef, valueFrom.secretKeyRef, valueFrom.genericKeyRef]
-    - optional: [optional, default]
+**Note:** values are loaded in from `.spec.envFrom` before `.spec.env`, and
+top down. Any values with the same key/name will be overwritten, last in wins.
 
-#### Env Ref
+**Schema:**
 
-- `.spec.env.name`
-  - name used to insert the referenced value into the template
-  - Schema:
-    - type: string
-- `.spec.env.value`
-  - static value to inject into template
-  - Schema:
-    - type: number|string|boolean
-- `.spec.env.valueFrom.configMapKeyRef` || `.spec.env.valueFrom.secretKeyRef`
-  - value referenced from a specific key in a ConfigMap or Secret
-  - Schema:
-    - type: object
-    - required: [name, key]
-    - optional: [namespace]
-- `.spec.env.valueFrom.genericKeyRef`
-  - value referenced from a specific key in any resource kind that has a `.data`
-  section to pull data from.
-  - Schema:
-    - type: object
-    - required: [apiVersion, kind, name, key]
-    - optional: [namespace]
+```yaml
+env:
+  type: array
+  items:
+    type: object
+    allOf:
+      - required: [name]
+      - # all array items should be oneOf ['value', 'valueFrom']
+        oneOf:
+          - required: [value]
+            # if 'value', neither 'optional' nor 'default' may be used
+            not:
+              anyOf:
+                - required: [default]
+                - required: [optional]
+          - required: [valueFrom]
+            # if 'valueFrom', you must define oneOf:
+            oneOf:
+              - # neither 'optional' nor 'default' is used
+                not:
+                  anyOf:
+                    - required: [default]
+                    - required: [optional]
+              - # 'optional' is used by itself
+                required: [optional]
+                not:
+                  required: [default]
+              - # 'optional' and 'default' are used together IFF optional == true
+                required: [optional, default]
+                properties:
+                  optional:
+                    enum: [true]
+    properties:
+      optional:
+        type: boolean
+      default:
+        x-kubernetes-int-or-string: true
+      name:
+        type: string
+      value:
+        x-kubernetes-int-or-string: true
+      valueFrom:
+        type: object
+        oneOf:
+          - required: [configMapKeyRef]
+          - required: [secretKeyRef]
+          - required: [genericKeyRef]
+        properties:
+          configMapKeyRef:
+            type: object
+            required: [name, key]
+            properties:
+              name:
+                type: string
+              key:
+                type: string
+              namespace:
+                type: string
+              type:
+                type: string
+                enum: [number, boolean, json]
+          secretKeyRef:
+            type: object
+            required: [name, key]
+            properties:
+              name:
+                type: string
+              key:
+                type: string
+              namespace:
+                type: string
+              type:
+                type: string
+                enum: [number, boolean, json]
+          genericKeyRef:
+            type: object
+            required: [apiVersion, kind, name, key]
+            properties:
+              apiVersion:
+                type: string
+              kind:
+                type: string
+              name:
+                type: string
+              key:
+                type: string
+              namespace:
+                type: string
+              type:
+                type: string
+                enum: [number, boolean, json]
+```
 
 #### Env Optional
 
-`.spec.env.optional`
+**Path:** `.spec.env[].optional`
 
-- DEFAULT: `false`
-  - if fetching env/envFrom resource fails, MustacheTemplate will stop
-  execution and report error to `.status`.
-  - **Note**: if `.spec.env.default` is specified, that value will
-  be used, execution  will continue, and MustacheTemplate will report info to `.status`.
-- `true`
-  - if fetching env/envFrom resource fails, MustacheTemplate will continue
-  attempting to process the templates, and will report info to `.status`.
+**Description:** If fetching env/envFrom resource fails, MustacheTemplate will stop
+execution and report error to `.status`. You can allow execution to continue by
+marking a reference as `optional: true`.
+
+**Schema:**
+
+```yaml
+optional:
+  type: boolean
+```
+
+**Default:** `false`
 
 #### Env Default
 
-`.spec.env.default`
+**Path:** `.spec.env[].default`
 
-If fetching env/envFrom resource fails, will use the value specified by default.
+**Description:** If fetching env/envFrom resource fails, but `.spec.env[].optional`
+is `true` and `.spec.env[].default` is defined, the default value will be used.
 
-- Schema:
-  - type: number|string|boolean
+**Schema:**
+
+```yaml
+default:
+  x-kubernetes-int-or-string: true
+```
 
 ### Managed Resource Labels
 

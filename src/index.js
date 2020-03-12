@@ -62,17 +62,23 @@ async function createNewEventHandler(kc) {
 }
 
 async function main() {
+  let kc;
   try {
     log.info(`Running ${ControllerString}Controller.`);
-    const kc = new KubeClass(kubeApiConfig);
-    const eventHandlers = [];
-    eventHandlers.push(createClassicEventHandler(kc));
-    eventHandlers.push(createNewEventHandler(kc));
-    await Promise.all(eventHandlers);
-  } catch(e){
-    log.error(e,'Error creating event handlers.');
+    kc = new KubeClass(kubeApiConfig);
+  }catch(e){
+    log.error(e,'Failed to get KubeClass.');
   }
-
+  try {
+    await createClassicEventHandler(kc);
+  } catch(e){
+    log.error(e,'Error creating classic event handler.');
+  }
+  try {
+    await createNewEventHandler(kc);
+  } catch(e){
+    log.error(e,'Error creating new event handler.');
+  }
 }
 
 main().catch(e => log.error(e));

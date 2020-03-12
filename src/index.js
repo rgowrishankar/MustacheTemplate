@@ -66,19 +66,20 @@ async function main() {
   try {
     log.info(`Running ${ControllerString}Controller.`);
     kc = new KubeClass(kubeApiConfig);
-  }catch(e){
-    log.error(e,'Failed to get KubeClass.');
+  } catch (e) {
+    log.error(e, 'Failed to get KubeClass.');
   }
   try {
     await createClassicEventHandler(kc);
-  } catch(e){
-    log.error(e,'Error creating classic event handler.');
+  } catch (e) {
+    log.error(e, 'Error creating classic event handler.');
   }
   try {
     await createNewEventHandler(kc);
-  } catch(e){
-    log.error(e,'Error creating new event handler.');
+  } catch (e) {
+    log.error(e, 'Error creating new event handler.');
   }
 }
+
 
 main().catch(e => log.error(e));

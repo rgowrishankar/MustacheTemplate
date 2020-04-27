@@ -6,7 +6,8 @@
   "keywords": [
     "kubernetes",
     "razee",
-    "razeedash"
+    "razeedash",
+    "cd"
   ],
   "scripts": {
     "start": "node src/index.js",
@@ -36,7 +37,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@razee/kubernetes-util": "0.0.10",
+    "@razee/kubernetes-util": "0.1.0",
     "@razee/razeedeploy-core": "^0.8.3",
     "bunyan": "^1.8.12",
     "js-yaml": "^3.13.1",

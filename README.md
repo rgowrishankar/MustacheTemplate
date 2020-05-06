@@ -219,7 +219,9 @@ optional:
 section to be used in template processing. ie. ConfigMaps would use the
 `configMapKeyRef` key and CRDs with a high level `.data` section can be pulled
 from by using the `genericKeyRef` key. `.spec.env.name` is what you would use to
-match values into your templates.
+match values into your templates. You can also specify a `type` that we will
+convert your fetched string into, before injecting into your template (one of
+[number, boolean, json, jsonString, base64]).
 
 **Note:** values are loaded in from `.spec.envFrom` before `.spec.env`, and
 top down. Any values with the same key/name will be overwritten, last in wins.
@@ -286,7 +288,7 @@ env:
                 type: string
               type:
                 type: string
-                enum: [number, boolean, json]
+                enum: [number, boolean, json, jsonString, base64]
           secretKeyRef:
             type: object
             required: [name, key]
@@ -299,7 +301,7 @@ env:
                 type: string
               type:
                 type: string
-                enum: [number, boolean, json]
+                enum: [number, boolean, json, jsonString, base64]
           genericKeyRef:
             type: object
             required: [apiVersion, kind, name, key]
@@ -316,7 +318,7 @@ env:
                 type: string
               type:
                 type: string
-                enum: [number, boolean, json]
+                enum: [number, boolean, json, jsonString, base64]
 ```
 
 #### Env Optional

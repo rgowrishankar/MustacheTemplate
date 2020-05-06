@@ -224,7 +224,7 @@ items:
                                     type: string
                                   type:
                                     type: string
-                                    enum: [number, boolean, json, base64]
+                                    enum: [number, boolean, json, jsonString, base64]
                               secretKeyRef:
                                 type: object
                                 required: [name, key]
@@ -237,7 +237,7 @@ items:
                                     type: string
                                   type:
                                     type: string
-                                    enum: [number, boolean, json, base64]
+                                    enum: [number, boolean, json, jsonString, base64]
                               genericKeyRef:
                                 type: object
                                 required: [apiVersion, kind, name, key]
@@ -254,7 +254,7 @@ items:
                                     type: string
                                   type:
                                     type: string
-                                    enum: [number, boolean, json, base64]
+                                    enum: [number, boolean, json, jsonString, base64]
                     templates:
                       type: array
                       items:

@@ -3,9 +3,9 @@ kind: List
 metadata:
   name: mustachetemplate-controller-list
   annotations:
-    version: "{{TRAVIS_COMMIT}}"
+    version: "{{{TRAVIS_COMMIT}}}"
     razee.io/git-repo: "{{{GIT_REMOTE}}}"
-    razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
+    razee.io/commit-sha: "{{{TRAVIS_COMMIT}}}"
 type: array
 items:
   - apiVersion: apps/v1
@@ -14,7 +14,7 @@ items:
       name: mustachetemplate-controller
       annotations:
         razee.io/git-repo: "{{{GIT_REMOTE}}}"
-        razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
+        razee.io/commit-sha: "{{{TRAVIS_COMMIT}}}"
       labels:
         razee/watch-resource: "lite"
     spec:
@@ -32,41 +32,45 @@ items:
           name: mustachetemplate-controller
         spec:
           serviceAccountName: razeedeploy-sa
+          securityContext:
+            runAsUser: {{{NODE_USER_ID}}}
+            runAsGroup: {{{NODE_GROUP_ID}}}
+            fsGroup: {{{NODE_GROUP_ID}}}
           containers:
-          - image: "quay.io/razee/mustachetemplate:{{TRAVIS_TAG}}"
-            resources:
-              limits:
-                memory: 200Mi
-                cpu: 100m
-              requests:
-                memory: 75Mi
-                cpu: 40m
-            env:
-              - name: CRD_WATCH_TIMEOUT_SECONDS
-                valueFrom:
-                  configMapKeyRef:
-                    name: razeedeploy-overrides
-                    key: CRD_WATCH_TIMEOUT_SECONDS
-                    optional: true
-            imagePullPolicy: Always
-            name: mustachetemplate-controller
-            livenessProbe:
-              exec:
-                command:
-                - sh/liveness.sh
-              initialDelaySeconds: 30
-              periodSeconds: 150
-              timeoutSeconds: 30
-              failureThreshold: 1
-            volumeMounts:
-            - mountPath: /usr/src/app/config
-              name: razeedeploy-config
+            - image: "quay.io/razee/mustachetemplate:{{{TRAVIS_TAG}}}"
+              resources:
+                limits:
+                  memory: 200Mi
+                  cpu: 100m
+                requests:
+                  memory: 75Mi
+                  cpu: 40m
+              env:
+                - name: CRD_WATCH_TIMEOUT_SECONDS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: razeedeploy-overrides
+                      key: CRD_WATCH_TIMEOUT_SECONDS
+                      optional: true
+              imagePullPolicy: Always
+              name: mustachetemplate-controller
+              livenessProbe:
+                exec:
+                  command:
+                    - sh/liveness.sh
+                initialDelaySeconds: 30
+                periodSeconds: 150
+                timeoutSeconds: 30
+                failureThreshold: 1
+              volumeMounts:
+                - mountPath: /home/node/config
+                  name: razeedeploy-config
           volumes:
-          - name: razeedeploy-config
-            configMap:
-              name: razeedeploy-config
-              defaultMode: 420
-              optional: true
+            - name: razeedeploy-config
+              configMap:
+                name: razeedeploy-config
+                defaultMode: 400
+                optional: true
   - apiVersion: apiextensions.k8s.io/v1beta1
     kind: CustomResourceDefinition
     metadata:
@@ -74,7 +78,7 @@ items:
       name: mustachetemplates.deploy.razee.io
       annotations:
         razee.io/git-repo: "{{{GIT_REMOTE}}}"
-        razee.io/commit-sha: "{{TRAVIS_COMMIT}}"
+        razee.io/commit-sha: "{{{TRAVIS_COMMIT}}}"
     spec:
       # group name to use for REST API: /apis/<group>/<version>
       group: deploy.razee.io
@@ -279,7 +283,7 @@ items:
         kind: MustacheTemplate
         # shortNames allow shorter string to match your resource on the CLI
         shortNames:
-        - mtp
+          - mtp
       subresources:
         # status enables the status subresource.
         status: {}

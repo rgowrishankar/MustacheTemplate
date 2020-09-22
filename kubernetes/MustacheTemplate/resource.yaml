@@ -122,6 +122,9 @@ items:
                         - required: [envFrom]
                         - required: [env]
                   properties:
+                    templateEngine:
+                      type: string
+                      pattern: "^mustache$|^handlebars$"
                     custom-tags:
                       type: array
                       maxItems: 2

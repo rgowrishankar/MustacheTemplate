@@ -42,6 +42,7 @@
     "@razee/kubernetes-util": "^0.1.5",
     "@razee/razeedeploy-core": "^0.9.1",
     "bunyan": "^1.8.14",
+    "handlebars": "^4.7.6",
     "js-yaml": "^3.14.0",
     "mustache": "^4.0.1",
     "object-path": "^0.11.4"

@@ -15,11 +15,12 @@
  */
 
 const Mustache = require('mustache');
+const Handlebars = require('handlebars');
+const HandlebarHelpers = require('./handlebar-helpers');
 const objectPath = require('object-path');
 const yaml = require('js-yaml');
 
 const { BaseTemplateController } = require('@razee/razeedeploy-core');
-
 
 module.exports = class MustacheTemplateController extends BaseTemplateController {
   constructor(params) {
@@ -38,7 +39,7 @@ module.exports = class MustacheTemplateController extends BaseTemplateController
     });
     return o;
   }
-
+  
   async _parseTemplates(s) {
     if (!Array.isArray(s)) {
       return Promise.reject({ statusCode: 500, message: '_parseTemplates expects an array' });
@@ -51,19 +52,33 @@ module.exports = class MustacheTemplateController extends BaseTemplateController
     return s;
   }
 
+  _renderTemplateItem(item, view, engine = 'mustache') {
+    if (engine === 'handlebars') {
+      let template = Handlebars.compile(item);
+      return template(view);
+    }
+    return Mustache.render(item, view);
+  }
+
   async processTemplate(templates, view) {
     let customTags = objectPath.get(this.data, ['object', 'spec', 'custom-tags']);
+    let templateEngine = objectPath.get(this.data, 'object.spec.templateEngine', 'mustache').toLowerCase();
+    this.log.info(`MustacheTemplateController: Using ${templateEngine} template engine`);
+
+    if (templateEngine === 'handlebars') { Handlebars.registerHelper(HandlebarHelpers); }
+
     let templatesArr = await this._stringifyTemplates(templates);
     let tempTags = Mustache.tags;
-    if (customTags) {
+    if (customTags && templateEngine === 'handlebars') {
+      return Promise.reject({ statusCode: 500, message: 'unable to set custom-tags when using handlebars' });
+    } else if (customTags && templateEngine === 'mustache') {
       Mustache.tags = customTags;
     }
     templatesArr.forEach((templatesString, i) => {
-      templatesArr[i] = Mustache.render(templatesString, view);
+      templatesArr[i] = this._renderTemplateItem(templatesString, view, templateEngine);
     });
     Mustache.tags = tempTags;
     let result = await this._parseTemplates(templatesArr);
     return result;
   }
-
 };

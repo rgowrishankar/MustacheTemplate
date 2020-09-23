@@ -39,7 +39,7 @@ module.exports = class MustacheTemplateController extends BaseTemplateController
     });
     return o;
   }
-  
+
   async _parseTemplates(s) {
     if (!Array.isArray(s)) {
       return Promise.reject({ statusCode: 500, message: '_parseTemplates expects an array' });
@@ -63,7 +63,7 @@ module.exports = class MustacheTemplateController extends BaseTemplateController
   async processTemplate(templates, view) {
     let customTags = objectPath.get(this.data, ['object', 'spec', 'custom-tags']);
     let templateEngine = objectPath.get(this.data, 'object.spec.templateEngine', 'mustache').toLowerCase();
-    this.log.info(`MustacheTemplateController: Using ${templateEngine} template engine`);
+    this.log.info(`Using "${templateEngine}" template engine for ${this.selfLink}`);
 
     if (templateEngine === 'handlebars') { Handlebars.registerHelper(HandlebarHelpers); }
 

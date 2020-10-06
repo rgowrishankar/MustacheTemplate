@@ -17,26 +17,36 @@
 const bunyan = require('bunyan');
 
 module.exports = {
-  'createLogger': function (name) {
+  'createLogger': function (name = 'MustacheTemplate') {
+    
+    const loggerConfig = {
+      name: name,
+      streams: [{
+        level: (process.env.LOG_LEVEL || 'info'),
+        stream: process.stdout // log LOG_LEVEL and above to stdout
+      }],
+      serializers: bunyan.stdSerializers,
+    };
+
     try {
-      return bunyan.createLogger({
-        name: name || 'MustacheTemplate',
-        streams: [{
-          level: (process.env.LOG_LEVEL || 'info'),
-          stream: process.stdout // log LOG_LEVEL and above to stdout
-        }],
-        serializers: bunyan.stdSerializers
-      });
+      if ( process.env.LOG_APPEND_TO_ALL_JSON ) {
+        try {
+          Object.assign(loggerConfig, JSON.parse( process.env.LOG_APPEND_TO_ALL_JSON ) );
+        } catch (error) {
+          console.error( 'Failed to parse APPEND_TO_LOGS', error );
+        }
+      }
+
+      return bunyan.createLogger(loggerConfig);
     } catch (err) {
       // unknown log level given, default to info
-      return bunyan.createLogger({
-        name: name || 'MustacheTemplate',
-        streams: [{
-          level: ('info'),
-          stream: process.stdout // log level and above to stdout
-        }],
-        serializers: bunyan.stdSerializers
-      });
+      console.error( '%s.  Defaulting to "info"', err.message );
+      loggerConfig.streams = [{
+        level: ('info'),
+        stream: process.stdout // log level and above to stdout
+      }];
+
+      return bunyan.createLogger(loggerConfig);
     }
   }
 };

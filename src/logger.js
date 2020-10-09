@@ -14,39 +14,32 @@
  * limitations under the License.
  */
 
-const bunyan = require('bunyan');
+const pino = require('pino');
 
 module.exports = {
   'createLogger': function (name = 'MustacheTemplate') {
     
     const loggerConfig = {
       name: name,
-      streams: [{
-        level: (process.env.LOG_LEVEL || 'info'),
-        stream: process.stdout // log LOG_LEVEL and above to stdout
-      }],
-      serializers: bunyan.stdSerializers,
+      level: (process.env.LOG_LEVEL || 'info'),
+      messageKey: 'message'
     };
+    let appendage = {};
 
     try {
       if ( process.env.LOG_APPEND_TO_ALL_JSON ) {
         try {
-          Object.assign(loggerConfig, JSON.parse( process.env.LOG_APPEND_TO_ALL_JSON ) );
+          appendage = JSON.parse( process.env.LOG_APPEND_TO_ALL_JSON );
         } catch (error) {
           console.error( 'Failed to parse APPEND_TO_LOGS', error );
         }
       }
-
-      return bunyan.createLogger(loggerConfig);
+      return pino(loggerConfig).child(appendage);
     } catch (err) {
       // unknown log level given, default to info
       console.error( '%s.  Defaulting to "info"', err.message );
-      loggerConfig.streams = [{
-        level: ('info'),
-        stream: process.stdout // log level and above to stdout
-      }];
-
-      return bunyan.createLogger(loggerConfig);
+      loggerConfig.level = 'info';
+      return pino(loggerConfig).child(appendage);
     }
   }
 };

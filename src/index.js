@@ -18,7 +18,7 @@ const { EventHandler, KubeClass, KubeApiConfig } = require('@razee/kubernetes-ut
 const kubeApiConfig = KubeApiConfig();
 
 const ControllerString = 'MustacheTemplate';
-const log = require('./bunyan-api').createLogger(ControllerString);
+const log = require('./logger').createLogger(ControllerString);
 
 async function createClassicEventHandler(kc) {
   let result;

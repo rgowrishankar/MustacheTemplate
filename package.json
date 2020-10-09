@@ -41,11 +41,11 @@
   "dependencies": {
     "@razee/kubernetes-util": "^0.1.6",
     "@razee/razeedeploy-core": "^0.10.3",
-    "bunyan": "^1.8.14",
     "handlebars": "^4.7.6",
     "js-yaml": "^3.14.0",
     "mustache": "^4.0.1",
-    "object-path": "^0.11.4"
+    "object-path": "^0.11.4",
+    "pino": "^6.7.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",

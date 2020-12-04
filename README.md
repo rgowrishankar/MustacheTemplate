@@ -239,7 +239,8 @@ section to be used in template processing. ie. ConfigMaps would use the
 from by using the `genericKeyRef` key. `.spec.env.name` is what you would use to
 match values into your templates. You can also specify a `type` that we will
 convert your fetched string into, before injecting into your template (one of
-[number, boolean, json, jsonString, base64]).
+[number, boolean, json, jsonString, base64]). Note: when no type is specified,
+the value will be treated as a normal string.
 
 **Note:** values are loaded in from `.spec.envFrom` before `.spec.env`, and
 top down. Any values with the same key/name will be overwritten, last in wins.

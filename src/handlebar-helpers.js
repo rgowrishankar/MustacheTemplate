@@ -26,11 +26,11 @@ const helpers = {
   },
   split(data, delimiter) {
     if (typeof data === 'string' && typeof delimiter === 'string') {
-      if (delimiter !== "") {
-        return data.split(delimiter)
+      if (delimiter !== '') {
+        return data.split(delimiter);
       }
     }
-    return []
+    return [];
   }
 };
 

@@ -24,7 +24,7 @@ const helpers = {
   or() {
     return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
   },
-  split(data, delimiter) {
+  split: function (data, delimiter) {
     if (typeof data === 'string' && typeof delimiter === 'string') {
       if (delimiter !== '') {
         return data.split(delimiter);

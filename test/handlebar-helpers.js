@@ -52,12 +52,18 @@ describe('handlebar-helper', function () {
     });
     it('should not correctly split ip:port when delimiter is empty', function () {
         ret = HandlebarHelper.split("10.10.10.10:400", "")
-        assert.equal(0, ret.length, 'there is no split')
+        assert.equal(15, ret.length, 'there is no split')
     });
     it('should not correctly split when delimiter is not string or data is not string', function () {
         ret = HandlebarHelper.split("10.10.10.10:400", 10)
-        assert.equal(0, ret.length, 'there is no split')
+        assert.equal(1, ret.length, 'there is no split')
         ret = HandlebarHelper.split(1000, "")
-        assert.equal(0, ret.length, 'there is no split')
+        assert.equal(1, ret.length, 'there is no split')
+    });
+    it('should not correctly split when delimiter is undefined', function () {
+        ret = HandlebarHelper.split("10.10.10.10:400", undefined)
+        assert.equal(1, ret.length, 'there is no split')
+        ret = HandlebarHelper.split(undefined, ":")
+        assert.equal(1, ret.length, 'there is no split')
     });
 });

@@ -50,9 +50,9 @@ describe('handlebar-helper', function () {
         assert.equal('10.10.10.10', ret[0], 'ip address is 10.10.10.10')
         assert.equal('400', ret[1], 'port is 400')
     });
-    it('should not correctly split ip:port when delimiter is empty', function () {
+    it('should correctly split on every character when delimiter is empty', function () {
         ret = HandlebarHelper.split("10.10.10.10:400", "")
-        assert.equal(15, ret.length, 'there is no split')
+        assert.equal(15, ret.length, 'should split on every character')
     });
     it('should not correctly split when delimiter is not string or data is not string', function () {
         ret = HandlebarHelper.split("10.10.10.10:400", 10)

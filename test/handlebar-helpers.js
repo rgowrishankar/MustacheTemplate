@@ -66,4 +66,26 @@ describe('handlebar-helper', function () {
         ret = HandlebarHelper.split(undefined, ":")
         assert.equal(1, ret.length, 'there is no split')
     });
+    it('should say that true and true is true', function () {
+        ret = HandlebarHelper.and(true, true)
+        assert.equal(true, ret, "and returns true when passed in true and true")
+    });
+    it('should say that true and false is false', function () {
+        ret = HandlebarHelper.and(true, false)
+        assert.equal(false, ret, "and returns false when passed in true and false")
+    });
+    it('should say that true or true is true', function () {
+        ret = HandlebarHelper.or(true, true)
+        assert.equal(true, ret, "or returns true when passed in true and true")
+    });
+    it('should say that true or false is true', function () {
+        ret = HandlebarHelper.or(true, false)
+        assert.equal(true, ret, "or returns true when passed in true and false")
+    });
+    it('should assign value correctly', function () {
+        var data = 'key'
+        var options = []
+        ret = HandlebarHelper.assign(data, 'what', options)
+        assert.equal(options.data.root[data], 'what', "assign works correctly")
+    });
 });

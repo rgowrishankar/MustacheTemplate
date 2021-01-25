@@ -82,6 +82,10 @@ describe('handlebar-helper', function () {
         ret = HandlebarHelper.or(true, false)
         assert.equal(true, ret, "or returns true when passed in true and false")
     });
+    it('should say that false or false is false', function () {
+        ret = HandlebarHelper.or(false, false)
+        assert.equal(false, ret, "or returns false when passed in false and false")
+    });
     it('should assign value correctly', function () {
         var data = 'key'
         var options = []
